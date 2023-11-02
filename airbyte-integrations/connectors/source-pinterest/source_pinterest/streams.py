@@ -97,13 +97,10 @@ class PinterestStream(HttpStream, ABC):
         Parsing response data with respect to Rate Limits.
         """
         data = response.json()
-        print("Response data: ", data)
-        print("data fields: ", self.data_fields)
 
         if not self.max_rate_limit_exceeded:
             for data_field in self.data_fields:
                 data = data.get(data_field, [])
-                print("data inner loop: ", data)
 
             for record in data:
                 yield record
