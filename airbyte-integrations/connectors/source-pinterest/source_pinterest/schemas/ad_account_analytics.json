@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "DATE": {
-      "type": ["null", "string"],
+      "type": ["string"],
       "format": "date"
     },
     "ADVERTISER_ID": {

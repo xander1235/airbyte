@@ -7,28 +7,11 @@
     "required": ["start_date"],
     "additionalProperties": true,
     "properties": {
-      "start_date": {
-        "type": "string",
-        "title": "Start Date",
-        "description": "A date in the format YYYY-MM-DD. If you have not set a date, it would be defaulted to latest allowed date by api (89 days from today).",
-        "format": "date",
-        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
-        "pattern_descriptor": "YYYY-MM-DD",
-        "examples": ["2022-07-28"]
-      },
-      "status": {
-        "title": "Status",
-        "description": "Entity statuses based off of campaigns, ad_groups, and ads. If you do not have a status set, it will be ignored completely.",
-        "type": ["array", "null"],
-        "items": {
-          "type": "string",
-          "enum": ["ACTIVE", "PAUSED", "ARCHIVED"]
-        },
-        "uniqueItems": true
-      },
       "credentials": {
         "title": "Authorization Method",
         "type": "object",
+        "order": 0,
+        "group": "auth",
         "oneOf": [
           {
             "type": "object",
@@ -79,9 +62,118 @@
             }
           }
         ]
+      },
+      "start_date": {
+        "type": "string",
+        "title": "Start Date",
+        "description": "A date in the format YYYY-MM-DD. If you have not set a date, it would be defaulted to latest allowed date by api (89 days from today).",
+        "format": "date",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+        "pattern_descriptor": "YYYY-MM-DD",
+        "examples": ["2022-07-28"],
+        "order": 1,
+         "group": "auth"
+      },
+      "end_date": {
+        "type": "string",
+        "title": "End Date",
+        "description": "A date in the format YYYY-MM-DD. Cannot be more than 90 days past start_date.",
+        "format": "date",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+        "pattern_descriptor": "YYYY-MM-DD",
+        "examples": ["2022-07-28"],
+        "order": 1,
+        "group": "other"
+      },
+      "click_window_days": {
+        "title": "Click window days",
+        "description": "Number of days to use as the conversion attribution window for a pin click action. Applies to Pinterest Tag conversion metrics. Prior conversion tags use their defined attribution windows. If not specified, defaults to 30 days.",
+        "type": "integer",
+        "items": {
+          "type": "integer",
+          "enum": [0, 1, 7, 14, 30, 60]
+        },
+        "group": "analytics",
+        "uniqueItems": true,
+        "order": 1
+      },
+      "view_window_days": {
+        "title": "View window days",
+        "description": "Number of days to use as the conversion attribution window for a view action. Applies to Pinterest Tag conversion metrics. Prior conversion tags use their defined attribution windows. If not specified, defaults to 1 day.",
+        "type": "integer",
+        "items": {
+          "type": "integer",
+          "enum": [0, 1, 7, 14, 30, 60]
+        },
+        "group": "analytics",
+        "uniqueItems": true,
+        "order": 3
+      },
+      "engagement_window_days": {
+        "title": "Engagement window days",
+        "description": "Number of days to use as the conversion attribution window for an engagement action. Engagements include saves, closeups, link clicks, and carousel card swipes. Applies to Pinterest Tag conversion metrics. Prior conversion tags use their defined attribution windows. If not specified, defaults to 30 days.",
+        "type": "integer",
+        "items": {
+          "type": "integer",
+          "enum": [0, 1, 7, 14, 30, 60],
+          "default" : [30]
+        },
+        "group": "analytics",
+        "uniqueItems": true,
+        "order": 2
+      },
+      "conversion_report_time": {
+        "title": "Conversion report time",
+        "description": "The date by which the conversion metrics returned from this endpoint will be reported. There are two dates associated with a conversion event: the date that the user interacted with the ad, and the date that the user completed a conversion event. If not specified, defaults to TIME_OF_AD_ACTION.",
+        "type": ["string", "null"],
+        "items": {
+          "type": "string",
+          "enum": ["TIME_OF_AD_ACTION", "TIME_OF_CONVERSION"]
+        },
+        "group": "analytics",
+        "uniqueItems": true,
+        "order": 4
+      },
+      "granularity": {
+        "title": "Granularity",
+        "description": "TOTAL - metrics are aggregated over the specified date range, DAY - metrics are broken down daily, HOUR - metrics are broken down hourly, WEEKLY - metrics are broken down weekly, MONTHLY - metrics are broken down monthly. If not specified, defaults to DAY.",
+        "type": ["string", "null"],
+        "items": {
+          "type": "string",
+          "enum": ["TOTAL", "DAY", "HOUR", "WEEK", "MONTH"]
+        },
+        "group": "analytics",
+        "uniqueItems": true,
+        "order": 0
+      },
+      "status": {
+        "title": "Status",
+        "description": "Entity statuses based off of campaigns, ad_groups, and ads. If you do not have a status set, it will be ignored completely.",
+        "type": ["array", "null"],
+        "items": {
+          "type": "string",
+          "enum": ["ACTIVE", "PAUSED", "ARCHIVED"]
+        },
+        "uniqueItems": true,
+        "order": 0,
+        "group": "other"
       }
     }
   },
+  "groups": [
+    {
+        "id": "auth",
+        "title": "Authentication config"
+      },
+      {
+        "id": "analytics",
+        "title": "Analytics config"
+      },
+    {
+        "id": "other",
+        "title": "Extra config"
+      }
+    ],
   "advanced_auth": {
     "auth_flow_type": "oauth2.0",
     "predicate_key": ["credentials", "auth_method"],

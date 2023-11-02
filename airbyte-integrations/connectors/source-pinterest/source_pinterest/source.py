@@ -46,6 +46,11 @@ class SourcePinterest(AbstractSource):
         else:
             try:
                 config["start_date"] = pendulum.from_format(config["start_date"], "YYYY-MM-DD")
+                if "end_date" in config:
+                    config["end_date"] = pendulum.from_format(config["end_date"], "YYYY-MM-DD")
+                else:
+                    config["end_date"] = pendulum.today().format("YYYY-MM-DD")
+
             except ValueError:
                 message = "Entered `Start Date` does not match format YYYY-MM-DD"
                 raise AirbyteTracedException(

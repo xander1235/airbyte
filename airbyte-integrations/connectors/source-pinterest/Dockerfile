@@ -31,6 +31,8 @@ RUN apk --no-cache add bash
 COPY main.py ./
 COPY source_pinterest ./source_pinterest
 
+RUN ls
+
 ENV AIRBYTE_ENTRYPOINT "python /airbyte/integration_code/main.py"
 ENTRYPOINT ["python", "/airbyte/integration_code/main.py"]
 

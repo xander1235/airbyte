@@ -34,11 +34,48 @@ class PinterestStream(HttpStream, ABC):
 
     @property
     def start_date(self):
+        print("config details for source: ", self.config)
         return self.config["start_date"]
 
     @property
+    def end_date(self):
+        # if "end_date" in self.config:
+        #     return self.config["end_date"]
+        return pendulum.now()
+
+    @property
+    def granularity(self):
+        if "granularity" in self.config:
+            return self.config["granularity"]
+        return "DAY"
+
+    @property
+    def click_window_days(self):
+        if "click_window_days" in self.config:
+            return self.config["click_window_days"]
+        return 30
+
+    @property
+    def view_window_days(self):
+        if "view_window_days" in self.config:
+            return self.config["view_window_days"]
+        return 1
+
+    @property
+    def engagement_window_days(self):
+        if "engagement_window_days" in self.config:
+            return self.config["engagement_window_days"]
+        return 30
+
+    @property
+    def conversion_report_time(self):
+        if "conversion_report_time" in self.config:
+            return self.config["conversion_report_time"]
+        return "TIME_OF_AD_ACTION"
+
+    @property
     def window_in_days(self):
-        return 30  # Set window_in_days to 30 days date range
+        return 30 # Set window_in_days to 30 days date range
 
     @property
     def availability_strategy(self) -> Optional["AvailabilityStrategy"]:
@@ -60,10 +97,13 @@ class PinterestStream(HttpStream, ABC):
         Parsing response data with respect to Rate Limits.
         """
         data = response.json()
+        print("Response data: ", data)
+        print("data fields: ", self.data_fields)
 
         if not self.max_rate_limit_exceeded:
             for data_field in self.data_fields:
                 data = data.get(data_field, [])
+                print("data inner loop: ", data)
 
             for record in data:
                 yield record
@@ -157,7 +197,14 @@ class IncrementalPinterestStream(PinterestStream, ABC):
         """
 
         start_date = self.start_date
-        end_date = pendulum.now()
+        current_date = pendulum.now()
+        end_date = self.end_date
+
+        print("start date type ", type(start_date))
+        print("current date type ", type(current_date))
+
+        if end_date > current_date:
+            end_date = current_date
 
         # determine stream_state, if no stream_state we use start_date
         if stream_state:
@@ -238,12 +285,21 @@ class PinterestAnalyticsStream(IncrementalPinterestSubStream):
         self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
     ) -> MutableMapping[str, Any]:
         params = super().request_params(stream_state, stream_slice, next_page_token)
+        temp_granularity = super().granularity
+
+        if temp_granularity:
+            self.granularity = temp_granularity
+
         params.update(
             {
                 "start_date": stream_slice["start_date"],
                 "end_date": stream_slice["end_date"],
                 "granularity": self.granularity,
                 "columns": get_analytics_columns(),
+                "click_window_days": self.click_window_days,
+                "view_window_days": self.view_window_days,
+                "engagement_window_days": self.engagement_window_days,
+                "conversion_report_time": self.conversion_report_time,
             }
         )
 
